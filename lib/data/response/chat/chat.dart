@@ -8,12 +8,12 @@ class Chat extends Equatable {
   final User sender;
   final String type;
   final String? message;
-  final DateTime? createdAt;
+  final int? createdAt;
   final String? channelType;
   final Map<String, dynamic>? attachment;
   final int? id;
   final List<User>? mentionedUsers;
-  final DateTime? updatedAt;
+  final int? updatedAt;
 
   const Chat(this.sender, this.type,
       {this.createdAt,
@@ -27,14 +27,12 @@ class Chat extends Equatable {
 
   static List<Chat> fromList(List<dynamic> data) => data
       .map((chatObj) => Chat(
-            chatObj['user'],
+            User.fromMap(chatObj['user']),
             chatObj['type'],
-            createdAt: DateTime.tryParse(
-                chatObj['created_at'] ?? DateTime.now().toIso8601String()),
+            createdAt: chatObj['created_at'] ?? 0,
             message: chatObj['message'] ?? '',
             channelType: chatObj['channel_type'],
-            updatedAt: DateTime.tryParse(
-                chatObj['updated_at'] ?? DateTime.now().toIso8601String()),
+            updatedAt: chatObj['updated_at'] ?? 0,
             attachment: chatObj['file'] as Map<String, dynamic>?,
             id: chatObj['message_id'] ?? 0,
           ))
@@ -60,11 +58,11 @@ class Chat extends Equatable {
     String? name,
     User? sender,
     String? message,
-    DateTime? createdAt,
+    int? createdAt,
     String? receiverType,
-    DateTime? deletedAt,
+    int? deletedAt,
     String? type,
-    DateTime? updatedAt,
+    int? updatedAt,
     List<dynamic>? attachment,
     int? id,
   ) {

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
+import 'package:blq_chat/ui/chat/views/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
@@ -11,11 +12,11 @@ class BLQChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
+    return ChangeNotifierProvider(
       create: (_) => ChatViewModel(),
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: PSStrings.psAppName,
+          title: BLQStrings.blqAppName,
           theme: ThemeData(
             primarySwatch: Colors.grey,
             colorScheme: const ColorScheme.light(
@@ -39,7 +40,7 @@ class BLQChat extends StatelessWidget {
               buttonColor: Colors.pink,
             ),
           ),
-          home: const BLQChat()),
+          home: ChatScreen()),
     );
   }
 }

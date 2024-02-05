@@ -1,8 +1,8 @@
-class PSStrings {
-  static String psAppName = 'Gangnam Spot';
-  static String psDefaultFailureString =
+class BLQStrings {
+  static String blqAppName = 'Gangnam Spot';
+  static String blqDefaultFailureString =
       'Something went wrong, try again later';
 
   ///This makes the class private and makes the class have only one instance
-  PSStrings._();
+  BLQStrings._();
 }

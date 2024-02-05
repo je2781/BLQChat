@@ -7,7 +7,7 @@ class User extends Equatable {
   final String? name;
   final bool? isActive;
   final String? role;
-  final int? id;
+  final String? id;
 
   const User({
     this.profileUrl,
@@ -20,31 +20,25 @@ class User extends Equatable {
   static List<User> fromList(List<dynamic> data) => data
       .map((userObj) => User(
           profileUrl: userObj['profile_url'] ?? '',
-          id: userObj['user_id'] ?? 0,
+          id: userObj['user_id'] ?? '',
           role: userObj['role'] ?? '',
           isActive: userObj['is_active'] ?? false,
           name: userObj['nickname']))
       .toList();
 
-  Map<String, dynamic> toMap() => {
-        'profile_url': profileUrl,
-        'name': name,
-        'is_active': isActive,
-        'role': role,
-        'id': id,
-      };
-
-  /// `dart:convert`
-  ///
-  /// Converts [User] to a JSON string.
-  String toJson() => json.encode(toMap());
+  static User fromMap(Map<String, dynamic> userObj) => User(
+      profileUrl: userObj['profile_url'] ?? '',
+      name: userObj['nickname'] ?? '',
+      isActive: userObj['is_active'] ?? false,
+      role: userObj['role'] ?? '',
+      id: userObj['user_id'] ?? '');
 
   User copyWith(
     String? profileUrl,
     String? name,
     bool? isActive,
     String? role,
-    int? id,
+    String? id,
   ) {
     return User(
         profileUrl: profileUrl ?? this.profileUrl,

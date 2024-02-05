@@ -12,7 +12,7 @@ extension ToDomain on FailureResponse {
   Failure toDomain() {
     return Failure(
       response.statusCode ?? -1,
-      response.data ?? [PSStrings.psDefaultFailureString],
+      response.data ?? [BLQStrings.blqDefaultFailureString],
     );
   }
 }

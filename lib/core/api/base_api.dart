@@ -11,8 +11,9 @@ enum HttpMethod { get, post, patch, put, delete }
 
 class ApiService {
   static final Map<String, String> _requestHeaders = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': '*/*',
+    "Connection": 'keep-alive',
+    "Content-Type": "äpplication/json"
   };
 
   final String? token;
@@ -51,6 +52,8 @@ class ApiService {
     required String endpoint,
     Map<String, dynamic>? reqBody,
     Map<String, dynamic>? queryParams,
+    bool useFormData = false,
+    FormData? formData,
     bool protected = true,
   }) async {
     try {
@@ -60,8 +63,14 @@ class ApiService {
             endpoint,
             data: reqBody,
             queryParameters: queryParams,
-            options:
-                Options(headers: !protected ? {} : {"Api-token": "$token"}),
+            options: Options(
+              headers: {
+                "Api-token": "$token",
+                "content-type":
+                    useFormData ? "multipart/form-data" : "application/json",
+                "boundary": "XXX"
+              },
+            ),
           );
           return ResponseModel(response);
 
@@ -69,17 +78,15 @@ class ApiService {
           Response response = await _dio().get(
             endpoint,
             queryParameters: queryParams,
-            options:
-                Options(headers: !protected ? {} : {"Api-token": "$token"}),
+            options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
         case HttpMethod.patch:
           Response response = await _dio().patch(
             endpoint,
-            data: reqBody,
+            data: useFormData ? formData : reqBody,
             queryParameters: queryParams,
-            options:
-                Options(headers: !protected ? {} : {"Api-token": "$token"}),
+            options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
         case HttpMethod.put:
@@ -87,8 +94,7 @@ class ApiService {
             endpoint,
             data: reqBody,
             queryParameters: queryParams,
-            options:
-                Options(headers: !protected ? {} : {"Api-token": "$token"}),
+            options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
         case HttpMethod.delete:
@@ -96,8 +102,7 @@ class ApiService {
             endpoint,
             data: reqBody,
             queryParameters: queryParams,
-            options:
-                Options(headers: !protected ? {} : {"Api-token": "$token"}),
+            options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
       }

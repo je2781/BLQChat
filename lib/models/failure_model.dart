@@ -8,5 +8,5 @@ class Failure {
 }
 
 class DefaultFailure extends Failure {
-  DefaultFailure() : super(-1, {'message': PSStrings.psDefaultFailureString});
+  DefaultFailure() : super(-1, {'message': BLQStrings.blqDefaultFailureString});
 }

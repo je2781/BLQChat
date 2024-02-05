@@ -25,9 +25,8 @@ class ChatRepo implements ChatRepoIntl {
     try {
       ResponseModel response = await api.call(
         method: HttpMethod.post,
-        endpoint: 'chat/send',
+        endpoint: 'open_channels/$channelUrl/messages',
         reqBody: chatFormModel.toMap(),
-        protected: true,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -44,13 +43,36 @@ class ChatRepo implements ChatRepoIntl {
   }
 
   @override
-  Future<Either<Failure, ChatRes>> getChats(dynamic chatCode) async {
+  Future<Either<Failure, ChatRes>> sendFileChat(
+      ChatFormModel chatFormModel) async {
+    try {
+      ResponseModel response = await api.call(
+        method: HttpMethod.post,
+        endpoint: 'open_channels/$channelUrl/messages',
+        reqBody: chatFormModel.toMap(),
+        useFormData: true,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // log('Value Right: ${response.data}');
+        return Right(ChatRes.fromMap(response.data));
+      } else {
+        // log('Value left: ${response.data}');
+        return Left(FailureResponse(response.response).toDomain());
+      }
+    } catch (ex, trace) {
+      log('ERROR caught: $ex, with stackTrace: $trace');
+      return Left(DefaultFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChatRes>> getChats() async {
     try {
       ResponseModel response = await api.call(
         method: HttpMethod.get,
         endpoint: 'open_channels/$channelUrl/messages',
-        queryParams: {"message_ts": 1609455600},
-        protected: true,
+        queryParams: {"message_ts": 1672531200},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

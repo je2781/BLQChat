@@ -1,28 +1,27 @@
 import 'dart:convert';
 
+import 'package:blq_chat/data/response/chat/chat.dart';
 import 'package:either_dart/either.dart';
 import 'package:equatable/equatable.dart';
 
-import './message.dart';
-
 class ChatRes extends Equatable {
-  final Messages? messages;
+  final List<Chat>? chats;
   final String? message;
   final bool? error;
   final int? statusCode;
 
-  const ChatRes({this.messages, this.message, this.error, this.statusCode});
+  const ChatRes({this.chats, this.message, this.error, this.statusCode});
 
   factory ChatRes.fromMap(Map<String, dynamic> data) => ChatRes(
         message: data['message'] ?? '',
-        messages: data['messages'] as Messages?,
+        chats: Chat.fromList(data['messages']),
         error: data['error'] as bool?,
         statusCode: data['statusCode'] as int?,
       );
 
   Map<String, dynamic> toMap() => {
         'message': message,
-        'messages': messages,
+        'chats': chats,
         'error': error,
         'status_code': statusCode,
       };
@@ -40,18 +39,18 @@ class ChatRes extends Equatable {
   String toJson() => json.encode(toMap());
 
   ChatRes copyWith(
-      {Messages? messages,
+      {List<Chat>? chats,
       String? message,
       String? status,
       bool? error,
       int? statusCode}) {
     return ChatRes(
         message: message ?? this.message,
-        messages: messages ?? this.messages,
+        chats: chats ?? this.chats,
         error: error ?? this.error,
         statusCode: statusCode ?? this.statusCode);
   }
 
   @override
-  List<Object?> get props => [message, messages, error, statusCode];
+  List<Object?> get props => [message, chats, error, statusCode];
 }
