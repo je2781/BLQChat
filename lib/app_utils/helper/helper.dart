@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:blq_chat/app_utils/widgets/spacing.dart';
+import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
 List<BoxShadow> elevation({required Color color, required int elevation}) {
   return [
@@ -742,126 +745,4 @@ navigateTo(BuildContext context, Widget target,
             alignment: Alignment.bottomCenter,
             child: target));
   }
-}
-
-extension StringExtension on String {
-  static String displayTimeAgoFromTimestamp(String timestamp) {
-    final year = int.parse(timestamp.substring(0, 4));
-    final month = int.parse(timestamp.substring(5, 7));
-    final day = int.parse(timestamp.substring(8, 10));
-    final hour = int.parse(timestamp.substring(11, 13));
-    final minute = int.parse(timestamp.substring(14, 16));
-
-    final DateTime videoDate = DateTime(year, month, day, hour, minute);
-    int diffInHours = DateTime.now().difference(videoDate).inHours;
-
-    String timeAgo = '';
-    String timeUnit = '';
-    int timeValue = 0;
-    if (diffInHours < 0) {
-      diffInHours = diffInHours * -1;
-      if (diffInHours < 1) {
-        final diffInMinutes = DateTime.now().difference(videoDate).inMinutes;
-        timeValue = diffInMinutes;
-        timeUnit = 'm';
-      } else if (diffInHours < 24) {
-        timeValue = diffInHours;
-        timeUnit = 'h';
-      } else if (diffInHours >= 24 && diffInHours < 24 * 7) {
-        timeValue = (diffInHours / 24).floor();
-        timeUnit = 'd';
-      } else if (diffInHours >= 24 * 7 && diffInHours < 24 * 30) {
-        timeValue = (diffInHours / (24 * 7)).floor();
-        timeUnit = 'w';
-      } else if (diffInHours >= 24 * 30 && diffInHours < 24 * 12 * 30) {
-        timeValue = (diffInHours / (24 * 30)).floor();
-        timeUnit = 'm';
-      } else {
-        timeValue = (diffInHours / (24 * 365)).floor();
-        timeUnit = 'y';
-      }
-      timeAgo = '$timeValue $timeUnit';
-      timeAgo += timeValue > 1 ? '' : '';
-
-      return 'in $timeAgo';
-    } else {
-      if (diffInHours < 1) {
-        final diffInMinutes = DateTime.now().difference(videoDate).inMinutes;
-        timeValue = diffInMinutes;
-        timeUnit = 'm';
-      } else if (diffInHours < 24) {
-        timeValue = diffInHours;
-        timeUnit = 'h';
-      } else if (diffInHours >= 24 && diffInHours < 24 * 7) {
-        timeValue = (diffInHours / 24).floor();
-        timeUnit = 'd';
-      } else if (diffInHours >= 24 * 7 && diffInHours < 24 * 30) {
-        timeValue = (diffInHours / (24 * 7)).floor();
-        timeUnit = 'wk';
-      } else if (diffInHours >= 24 * 30 && diffInHours < 24 * 12 * 30) {
-        timeValue = (diffInHours / (24 * 30)).floor();
-        timeUnit = 'mon';
-      } else {
-        timeValue = (diffInHours / (24 * 365)).floor();
-        timeUnit = 'yr';
-      }
-      timeAgo = timeValue.toString() + timeUnit;
-      timeAgo += timeValue > 1 ? '' : '';
-
-      return timeAgo;
-    }
-  }
-}
-
-Future<dynamic> showPickerDialog(
-    BuildContext context, String val, NavigatorState navigator,
-    {String? country, String? countryId}) async {
-  List<dynamic>? extractedData;
-  if (country != null) {
-    // Fetch cities from the json file
-    final countryCities =
-        await rootBundle.loadString('assets/countries/city.json');
-    final listOfCountryCities = json.decode(countryCities);
-    extractedData =
-        listOfCountryCities.where((city) => city['id'] == countryId!).toList();
-  } else {
-    // Fetch languages from the json file
-    final languages =
-        await rootBundle.loadString('assets/languages/languages.json');
-    extractedData = json.decode(languages);
-  }
-
-  return showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => SimpleDialog(
-      title: Text('Select a $val'),
-      children: extractedData!.map((data) {
-        final name = data['name'];
-        return SimpleDialogOption(
-          onPressed: () => navigator.pop(name),
-          child: Text(name),
-        );
-      }).toList(),
-    ),
-  );
-}
-
-class ListPrograms {
-  final String? name;
-  final String? icon;
-  dynamic id;
-
-  ListPrograms({
-    this.name = '',
-    this.icon,
-    this.id,
-  });
-}
-
-class ListNames2 {
-  String name;
-  String image;
-  dynamic id;
-  ListNames2({this.name = '', this.id, required this.image});
 }

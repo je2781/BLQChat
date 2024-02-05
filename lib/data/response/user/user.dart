@@ -33,6 +33,12 @@ class User extends Equatable {
       role: userObj['role'] ?? '',
       id: userObj['user_id'] ?? '');
 
+  Map<String, dynamic> toMap() => {
+        'nickname': name,
+        'user_id': id,
+        'profile_url': profileUrl,
+      };
+
   User copyWith(
     String? profileUrl,
     String? name,

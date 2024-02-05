@@ -62,7 +62,6 @@ class ApiService {
           Response response = await _dio().post(
             endpoint,
             data: reqBody,
-            queryParameters: queryParams,
             options: Options(
               headers: {
                 "Api-token": "$token",
@@ -84,8 +83,7 @@ class ApiService {
         case HttpMethod.patch:
           Response response = await _dio().patch(
             endpoint,
-            data: useFormData ? formData : reqBody,
-            queryParameters: queryParams,
+            data: reqBody,
             options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
@@ -93,7 +91,6 @@ class ApiService {
           Response response = await _dio().put(
             endpoint,
             data: reqBody,
-            queryParameters: queryParams,
             options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);
@@ -101,7 +98,6 @@ class ApiService {
           Response response = await _dio().delete(
             endpoint,
             data: reqBody,
-            queryParameters: queryParams,
             options: Options(headers: {"Api-token": "$token"}),
           );
           return ResponseModel(response);

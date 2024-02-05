@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:blq_chat/app_utils/extensions/time_conversion_extension.dart';
+import 'package:blq_chat/data/repository/user/user_repo.dart';
 import 'package:blq_chat/data/response/chat/chat.dart';
+import 'package:blq_chat/data/response/user/user.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:either_dart/either.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:blq_chat/app_utils/helper/helper.dart';
@@ -63,16 +68,27 @@ class ChatViewModel extends ChangeNotifier {
     chatRepo = ChatRepo(apiToken);
 
     try {
+      //getting instance of local storage
+      final prefs = await SharedPreferences.getInstance();
+
+      if (!prefs.containsKey('userData')) {
+        handleError('You do not have a user profile');
+        return false;
+      }
+
+      final extractedUserData =
+          json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+
       if (filePaths.isNotEmpty) {
-        final ChatFormModel chatFormModel = ChatFormModel('FILE',
-            userId: chatFormData['user_id'],
+        final ChatFileModel chatFileModel = ChatFileModel('FILE',
+            userId: extractedUserData['userId'] as String,
             files: filePaths.length > 1
                 ? Right(multipartFiles)
                 : Left(String.fromCharCodes(
                     File(filePaths.first).readAsBytesSync())));
 
         // log('Attempting to send chat');
-        final result = await chatRepo!.sendFileChat(chatFormModel);
+        final result = await chatRepo!.sendFileChat(chatFileModel);
         if (result.isLeft) {
           log('sending file failed: ${result.left.message!['message']}');
           sentFile = false;
@@ -80,16 +96,27 @@ class ChatViewModel extends ChangeNotifier {
         }
       }
 
-      final ChatFormModel chatFormModel = ChatFormModel('MESG',
-          userId: chatFormData['user_id'], message: chatFormData['message']);
-
-      final result = await chatRepo!.sendChat(chatFormModel);
+      final result = await chatRepo!.sendChat({
+        'message_type': 'MESG',
+        'user_id': extractedUserData['userId'] as String,
+        'message': chatFormData['message']
+      });
       if (result.isLeft) {
         log('sending chat failed: ${result.left.message!['message']}');
 
         handleError('sending chat failed!');
       } else {
         // log('sending chat successful');
+
+        _savedChats.add(Chat(
+            User(
+                name: result.right.chats!.left.sender.name,
+                id: result.right.chats!.left.sender.id,
+                isActive: result.right.chats!.left.sender.isActive,
+                profileUrl: result.right.chats!.left.sender.profileUrl),
+            filePaths.isNotEmpty ? 'FILE' : 'MESG',
+            channelType: result.right.chats!.left.channelType,
+            createdAt: result.right.chats!.left.createdAt));
         sentChat = true;
       }
     } catch (ex, trace) {
@@ -122,7 +149,7 @@ class ChatViewModel extends ChangeNotifier {
         // log('getting chats successful');
         // toastMessage('chats downloaded', long: false);
 
-        _savedChats = conversations.right.chats!;
+        _savedChats = conversations.right.chats!.right;
       }
     } catch (ex, trace) {
       log('Exception caught : $ex, with strace: $trace');
@@ -130,6 +157,76 @@ class ChatViewModel extends ChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> createUserRequest(Map<String, dynamic> userData) async {
+    log('This is the token gotten from env variables');
+    const String apiToken = String.fromEnvironment('Api-token');
+
+    try {
+      final UserRepo userRepo = UserRepo(apiToken);
+
+      // log('Attempting to create user');
+      final user = await userRepo.createUser(userData);
+
+      if (user.isLeft) {
+        handleError('could not create your profile: ');
+      } else {
+        //storing userId in local storage to retrieve later for authentication
+        final prefs = await SharedPreferences.getInstance();
+        final userData = json.encode(
+          {
+            'userId': user.right.user!.id,
+            'name': user.right.user!.name,
+            'url': user.right.user!.profileUrl
+          },
+        );
+        prefs.setString('userData', userData);
+
+        toastMessage('user profile created', long: false);
+      }
+    } catch (ex, trace) {
+      log('Exception caught : $ex, with strace: $trace');
+      toastMessage(ex.toString());
+    }
+  }
+
+  Future<bool> getUserRequest() async {
+    log('This is the token gotten from env variables');
+    const String apiToken = String.fromEnvironment('Api-token');
+
+    try {
+      //getting instance of local storage
+      final prefs = await SharedPreferences.getInstance();
+
+      if (!prefs.containsKey('userData')) {
+        return false;
+      }
+
+      final extractedUserData =
+          json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+
+      final UserRepo userRepo = UserRepo(apiToken);
+
+      final user =
+          await userRepo.getUser(extractedUserData['userId'] as String);
+
+      if (user.isLeft) {
+        handleError('could not find user profile');
+        return false;
+      } else {
+        //checking if user profile has been created
+        if (user.right.user!.id == extractedUserData['userId']) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } catch (ex, trace) {
+      log('Exception caught : $ex, with strace: $trace');
+      toastMessage(ex.toString());
+      return false;
     }
   }
 

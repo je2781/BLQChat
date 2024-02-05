@@ -48,7 +48,7 @@ class _MessagesWidgetState extends State<MessagesWidget> {
                       children: [
                         const Expanded(
                           flex: 1,
-                          child: Divider(thickness: 1, color: psGrey3),
+                          child: Divider(thickness: 1, color: blqGrey3),
                         ),
                         const Spacing.tinyWidth(),
                         sText(
@@ -60,7 +60,7 @@ class _MessagesWidgetState extends State<MessagesWidget> {
                         const Spacing.tinyWidth(),
                         const Expanded(
                           flex: 1,
-                          child: Divider(thickness: 1, color: psGrey3),
+                          child: Divider(thickness: 1, color: blqGrey3),
                         ),
                       ],
                     ),

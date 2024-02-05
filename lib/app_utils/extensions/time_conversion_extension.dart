@@ -5,3 +5,9 @@ extension UnixConversion on BuildContext {
     return DateTime.fromMillisecondsSinceEpoch(timestamp);
   }
 }
+
+extension DateTimeConversion on BuildContext {
+  int convertDateTimeToUnix(DateTime date) {
+    return date.toUtc().millisecondsSinceEpoch;
+  }
+}

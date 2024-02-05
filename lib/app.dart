@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:blq_chat/app_utils/styles/colors.dart';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:blq_chat/ui/chat/views/chat_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,12 @@ class BLQChat extends StatelessWidget {
             colorScheme: const ColorScheme.light(
               primary: Colors.black,
               secondary: Colors.pinkAccent,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(24),
+                borderSide: BorderSide(color: HexColor('#323232'), width: 2),
+              ),
             ),
             visualDensity: VisualDensity.adaptivePlatformDensity,
             fontFamily: 'Poppins',
