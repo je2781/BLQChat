@@ -19,6 +19,7 @@ class Minute extends StatefulWidget {
 
 class _MinuteState extends State<Minute> {
   dynamic _currentUserId = '';
+  dynamic _currentUser = '';
   @override
   void initState() {
     // TODO: implement initState
@@ -27,15 +28,19 @@ class _MinuteState extends State<Minute> {
       //getting instance of local storage
       final prefs = await SharedPreferences.getInstance();
 
-      if (!prefs.containsKey('userData')) {
+      if (!prefs.containsKey('userData') || !prefs.containsKey('messageData')) {
         return;
       }
 
       final extractedUserData =
           json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
 
+      final extractedMessageData =
+          json.decode(prefs.getString('messageData')!) as Map<String, dynamic>;
+
       setState(() {
         _currentUserId = extractedUserData['userId'];
+        _currentUser = extractedMessageData['sender'];
       });
     });
   }
@@ -98,7 +103,7 @@ class _MinuteState extends State<Minute> {
                                 children: [
                                   sText(
                                       mins.sender.id == _currentUserId
-                                          ? 'Josh Eze'
+                                          ? _currentUser
                                           : mins.sender.name.isEmpty
                                               ? 'Test'
                                               : mins.sender.name,

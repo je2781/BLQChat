@@ -41,37 +41,44 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isPortrait = mediaQuery.orientation == Orientation.portrait;
+    //declaring AppBar
+    final appBar = AppBar(
+      title: Text(BLQStrings.blqAppName),
+      leading: IconButton(onPressed: () => {}, icon: Icon(Icons.chevron_left)),
+      centerTitle: true,
+      actions: [
+        IconButton(
+            onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  enableDrag: false,
+                  builder: (_) {
+                    return MyProfile();
+                  },
+                ),
+            icon: Icon(Icons.menu))
+      ],
+    );
+    //extracting the available screen height for the widgets
+    final availableWidgetHeight = (mediaQuery.size.height -
+        appBar.preferredSize.height -
+        mediaQuery.padding.top);
     return WillPopScope(
       onWillPop: () async {
         // Return false to prevent back button press.
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(BLQStrings.blqAppName),
-          leading:
-              IconButton(onPressed: () => {}, icon: Icon(Icons.chevron_left)),
-          centerTitle: true,
-          actions: [
-            IconButton(
-                onPressed: () => showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      enableDrag: false,
-                      builder: (_) {
-                        return MyProfile();
-                      },
-                    ),
-                icon: Icon(Icons.menu))
-          ],
-        ),
-        body: Container(
-          margin: const EdgeInsets.only(
-            top: 5,
-          ),
+        appBar: appBar,
+        body: SingleChildScrollView(
           child: Column(
             children: [
-              Expanded(
+              SizedBox(
+                height: isPortrait
+                    ? availableWidgetHeight * 0.88
+                    : availableWidgetHeight * 0.7,
                 child: Consumer<ChatViewModel>(builder: (_, model, ch) {
                   //extracting chats for different months
                   final monthList = Order.reorderList(model.chats, context);

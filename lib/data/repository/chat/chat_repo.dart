@@ -69,12 +69,12 @@ class ChatRepo implements ChatRepoIntl {
   }
 
   @override
-  Future<Either<Failure, ChatRes>> getChats(dynamic messageId) async {
+  Future<Either<Failure, ChatRes>> getChats({int? messageId}) async {
     try {
       ResponseModel response = await api.call(
         method: HttpMethod.get,
         endpoint: 'open_channels/$channelUrl/messages',
-        queryParams: messageId.isNaN
+        queryParams: messageId == null
             ? {"message_ts": 1672531200}
             : {"message_id": messageId},
       );

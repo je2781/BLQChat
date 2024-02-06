@@ -5,7 +5,9 @@ import 'dart:typed_data';
 import 'package:blq_chat/app_utils/extensions/time_conversion_extension.dart';
 import 'package:blq_chat/data/repository/user/user_repo.dart';
 import 'package:blq_chat/data/response/chat/chat.dart';
+import 'package:blq_chat/data/response/chat/chat_view_res.dart';
 import 'package:blq_chat/data/response/user/user.dart';
+import 'package:blq_chat/models/failure_model.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:either_dart/either.dart';
@@ -20,6 +22,7 @@ class ChatViewModel extends ChangeNotifier {
   bool sentChat = false;
   bool sentFile = true;
   ChatRepo? chatRepo;
+  Either<Failure, ChatRes>? conversations;
 
   //Document upload
   FilePickerResult? fileUpload;
@@ -111,13 +114,14 @@ class ChatViewModel extends ChangeNotifier {
             id: result.right.chats!.left.id,
             message: result.right.chats!.left.message,
             channelType: result.right.chats!.left.channelType,
-            createdAt: result.right.chats!.left.createdAt));
+            createdAt: context.convertDateTimeToUnix(DateTime.now())));
         //confirming chat has been sent
         sentChat = true;
         //storing message id of sent message in local storage
         final messageData = json.encode(
           {
             'messageId': result.right.chats!.left.id,
+            'sender': result.right.chats!.left.sender.name
           },
         );
         await prefs.setString('messageData', messageData);
@@ -140,23 +144,27 @@ class ChatViewModel extends ChangeNotifier {
     const String apiToken = String.fromEnvironment('Api-token');
 
     try {
+      final ChatRepo chatRepo = ChatRepo(apiToken);
+
       //getting instance of local storage
       final prefs = await SharedPreferences.getInstance();
 
-      final extractedMessageData =
-          json.decode(prefs.getString('messageData')!) as Map<String, dynamic>;
+      // checking if local storage any message id is stored
+      if (!prefs.containsKey('messageData')) {
+        conversations = await chatRepo.getChats();
+      } else {
+        final extractedMessageData = json
+            .decode(prefs.getString('messageData')!) as Map<String, dynamic>;
 
-      final ChatRepo chatRepo = ChatRepo(apiToken);
+        conversations = await chatRepo.getChats(
+            messageId: extractedMessageData['messageId']);
+      }
 
-      // log('Attempting to get chats');
-      final conversations =
-          await chatRepo.getChats(extractedMessageData['messageId']);
-
-      if (conversations.isLeft) {
+      if (conversations!.isLeft) {
         // log('getting chats failed: ${conversations.left.status}');
         handleError('chats failed to download');
       } else {
-        _savedChats.addAll(conversations.right.chats!.right);
+        _savedChats.addAll(conversations!.right.chats!.right);
       }
     } catch (ex, trace) {
       log('Exception caught : $ex, with strace: $trace');

@@ -36,11 +36,7 @@ class _NewMessageState extends State<NewMessage> {
         MediaQuery.of(context).orientation == Orientation.landscape;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(
-          top: 5,
-          bottom: 5 + MediaQuery.of(context).viewInsets.bottom,
-          left: 5,
-          right: 5),
+      padding: EdgeInsets.only(top: 5, bottom: 5, left: 5, right: 5),
       decoration: BoxDecoration(color: HexColor('#131313')),
       height: isLandscape
           ? MediaQuery.of(context!).size.height * .25
