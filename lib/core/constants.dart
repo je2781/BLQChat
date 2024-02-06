@@ -1,4 +1,6 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AppConstants {
-  static const String applicationId = String.fromEnvironment('application_id');
-  static const String baseUrl = "https://api-$applicationId.sendbird.com/v3/";
+  static String applicationId = dotenv.env['APPLICATION_ID']!;
+  static String baseUrl = "https://api-$applicationId.sendbird.com/v3/";
 }

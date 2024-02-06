@@ -13,11 +13,12 @@ import 'package:blq_chat/models/failure_model.dart';
 import 'package:dio/dio.dart';
 import 'package:either_dart/either.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserRepo implements UserRepoIntl {
   late ApiService api;
   final String? token;
-  static const String channelUrl = String.fromEnvironment('channel_url');
+  static String channelUrl = dotenv.get('CHANNEL_URL');
 
   UserRepo(this.token) {
     api = ApiService(token: token);

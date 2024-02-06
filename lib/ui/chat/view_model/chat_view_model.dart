@@ -9,6 +9,7 @@ import 'package:blq_chat/data/response/chat/chat_view_res.dart';
 import 'package:blq_chat/data/response/user/user.dart';
 import 'package:blq_chat/models/failure_model.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:either_dart/either.dart';
 import 'package:file_picker/file_picker.dart';
@@ -62,7 +63,7 @@ class ChatViewModel extends ChangeNotifier {
     isLoading = true;
 
     log('This is the token gotten from env variables');
-    const String apiToken = String.fromEnvironment('Api-token');
+    String apiToken = dotenv.get('API_TOKEN');
 
     chatRepo = ChatRepo(apiToken);
 
@@ -141,7 +142,7 @@ class ChatViewModel extends ChangeNotifier {
     isLoading = true;
 
     log('This is the token gotten from env variables');
-    const String apiToken = String.fromEnvironment('Api-token');
+    final String apiToken = dotenv.get('API_TOKEN');
 
     try {
       final ChatRepo chatRepo = ChatRepo(apiToken);
@@ -177,7 +178,7 @@ class ChatViewModel extends ChangeNotifier {
 
   Future<void> createUserRequest(Map<String, dynamic> userData) async {
     log('This is the token gotten from env variables');
-    const String apiToken = String.fromEnvironment('Api-token');
+    final String apiToken = dotenv.get('API_TOKEN');
 
     try {
       final UserRepo userRepo = UserRepo(apiToken);
@@ -216,7 +217,7 @@ class ChatViewModel extends ChangeNotifier {
 
   Future<bool> getUserRequest() async {
     log('This is the token gotten from env variables');
-    const String apiToken = String.fromEnvironment('Api-token');
+    final String apiToken = dotenv.get('API_TOKEN');
 
     try {
       //getting instance of local storage
