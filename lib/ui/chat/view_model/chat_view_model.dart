@@ -182,6 +182,13 @@ class ChatViewModel extends ChangeNotifier {
     try {
       final UserRepo userRepo = UserRepo(apiToken);
 
+      //checking for duplicate user profiles
+      final extractedUser = await userRepo.getUser(userData['user_id']);
+      if (extractedUser.isRight) {
+        if (extractedUser.right.user!.id == userData['user_id']) {
+          return handleError('user account already exists');
+        }
+      }
       // log('Attempting to create user');
       final user = await userRepo.createUser(userData);
 

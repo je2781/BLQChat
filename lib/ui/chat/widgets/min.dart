@@ -5,6 +5,7 @@ import 'package:blq_chat/app_utils/helper/helper.dart';
 import 'package:blq_chat/app_utils/styles/colors.dart';
 import 'package:blq_chat/app_utils/widgets/spacing.dart';
 import 'package:blq_chat/utils/ps_color.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,15 +61,20 @@ class _MinuteState extends State<Minute> {
                         mins.sender.id != _currentUserId
                             ? Container(
                                 margin: EdgeInsets.only(top: 18),
-                                child: mins.sender.profileUrl.isNotEmpty
+                                child: mins.sender.profileUrl.isNotEmpty &&
+                                        mins.sender.profileUrl
+                                            .startsWith('https')
                                     ? CircleAvatar(
                                         radius: 20,
-                                        backgroundImage: NetworkImage(
-                                            mins.sender.profileUrl),
+                                        backgroundImage:
+                                            CachedNetworkImageProvider(mins
+                                                    .sender.profileUrl ??
+                                                'https://www.seti.org/sites/default/files/styles/original/public/2019-09/Zork%20alien%20head%20PPR.jpg?itok=T7eTYzCZ'),
                                       )
                                     : CircleAvatar(
                                         radius: 20,
-                                        backgroundColor: blqGrey3,
+                                        backgroundImage: CachedNetworkImageProvider(
+                                            'https://www.seti.org/sites/default/files/styles/original/public/2019-09/Zork%20alien%20head%20PPR.jpg?itok=T7eTYzCZ'),
                                       ),
                               )
                             : const SizedBox.shrink(),

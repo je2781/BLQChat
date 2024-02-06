@@ -21,9 +21,12 @@ class _MyProfileState extends State<MyProfile> {
   final _urlFocusNode = FocusNode();
 
   void _onSubmit() {
+    //error checking
     if (_idController.text.isEmpty ||
-        _profileUrlController.text.isEmpty ||
+        (_profileUrlController.text.isEmpty ||
+            !_profileUrlController.text.startsWith('https')) ||
         _nameController.text.isEmpty) {
+      toastMessage('Check the details being entered', long: true);
       return;
     } else {
       Provider.of<ChatViewModel>(context, listen: false).createUserRequest({
