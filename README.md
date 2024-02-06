@@ -1,16 +1,22 @@
-# blq_chat
+---
+title: BLQChat
+description: Chat app
+author: Joshua Eze
+created:  2024 Feb 05
+updated: 2024 Feb 06
+---
 
-A new Flutter project.
+BLQChatApp
+=========
 
-## Getting Started
+## development
+I started with designing the models/interfaces for the repos, response, requests, used in the sendbird chat api consumption. After the sendbird api started responding, I designed widgets to cater for messages sent every minute. The chat screen was last, ensuring only registered users could send chats. 
 
-This project is a starting point for a Flutter application.
+## How to run the app
 
-A few resources to get you started if this is your first Flutter project:
+From the main directory, run (flutter run) to start gradle build. The first build is always long to complete, but when it's done, the installed app can be deployed on an emulator
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
+
