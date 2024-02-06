@@ -107,17 +107,30 @@ class _MinuteState extends State<Minute> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  sText(
-                                      mins.sender.id == _currentUserId
-                                          ? _currentUser
-                                          : mins.sender.name.isEmpty
-                                              ? 'Test'
-                                              : mins.sender.name,
-                                      weight: FontWeight.bold,
-                                      color: mins.sender.id == _currentUserId
-                                          ? blqWhite
-                                          : blqGrey3,
-                                      size: 14),
+                                  Row(
+                                    children: [
+                                      sText(
+                                          mins.sender.id == _currentUserId
+                                              ? _currentUser
+                                              : mins.sender.name.isEmpty
+                                                  ? 'Test'
+                                                  : mins.sender.name,
+                                          weight: FontWeight.bold,
+                                          color:
+                                              mins.sender.id == _currentUserId
+                                                  ? blqWhite
+                                                  : blqGrey3,
+                                          size: 14),
+                                      Spacing.smallWidth(),
+                                      mins.sender.isActive
+                                          ? Icon(
+                                              Icons.circle,
+                                              color: blqSuccess,
+                                              size: 8,
+                                            )
+                                          : SizedBox.shrink()
+                                    ],
+                                  ),
                                   const Spacing.smallHeight(),
                                   Text(
                                     mins.message ?? '',
