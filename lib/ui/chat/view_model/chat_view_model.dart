@@ -38,24 +38,52 @@ class ChatViewModel extends ChangeNotifier {
 
   List<Chat> get chats => [..._savedChats];
 
-  Future<void> pickFiles() async {
-    fileUpload = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      withData: true,
-    );
-    if (fileUpload != null) {
-      fileName = fileUpload!.files[0].name;
-      fileSize = ((fileUpload!.files[0].size / 1024) / 1024);
+  Future<void> sendFile() async {
+    try {
+      fileUpload = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        withData: true,
+      );
+      if (fileUpload != null) {
+        fileName = fileUpload!.files[0].name;
+        fileSize = ((fileUpload!.files[0].size / 1024) / 1024);
 
-      if (fileSize! > 5.0) {
-        log('file have exceeded file size limit');
-        toastMessage("File have exceeded 5MB", long: true);
-        return;
+        if (fileSize! > 5.0) {
+          log('file have exceeded file size limit');
+          toastMessage("File have exceeded 5MB", long: true);
+          return;
+        }
+
+        //getting instance of local storage
+        final prefs = await SharedPreferences.getInstance();
+
+        if (!prefs.containsKey('userData')) {
+          handleError('You do not have a user profile');
+          return;
+        }
+
+        final extractedUserData =
+            json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+
+        final ChatFileModel chatFileModel = ChatFileModel('FILE',
+            userId: extractedUserData['userId'] as String,
+            file: String.fromCharCodes(
+                File(fileUpload!.paths[0]!).readAsBytesSync()));
+
+        // log('Attempting to send chat');
+        final result = await chatRepo!.sendFileChat(chatFileModel);
+        if (result.isLeft) {
+          log('sending file failed: ${result.left.message!['message']}');
+          sentFile = false;
+          handleError('sending file failed!');
+        }
       }
-
-      filePath = fileUpload!.paths[0];
+    } catch (ex, trace) {
+      log('Exception caught : $ex, with strace: $trace');
+      toastMessage(ex.toString());
+    } finally {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<bool> sendChatRequest(
@@ -78,20 +106,6 @@ class ChatViewModel extends ChangeNotifier {
 
       final extractedUserData =
           json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
-
-      if (filePath != null) {
-        final ChatFileModel chatFileModel = ChatFileModel('FILE',
-            userId: extractedUserData['userId'] as String,
-            file: String.fromCharCodes(File(filePath!).readAsBytesSync()));
-
-        // log('Attempting to send chat');
-        final result = await chatRepo!.sendFileChat(chatFileModel);
-        if (result.isLeft) {
-          log('sending file failed: ${result.left.message!['message']}');
-          sentFile = false;
-          handleError('sending file failed!');
-        }
-      }
 
       final result = await chatRepo!.sendChat({
         'message_type': 'MESG',
