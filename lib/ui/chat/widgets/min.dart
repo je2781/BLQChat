@@ -72,7 +72,7 @@ class _MinuteState extends State<Minute> {
                           children: [
                             Container(
                               margin: EdgeInsets.only(
-                                  top: 18, bottom: 0, left: 12, right: 12),
+                                  top: 18, bottom: 0, left: 8, right: 8),
                               width: 140,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 10,
@@ -83,14 +83,14 @@ class _MinuteState extends State<Minute> {
                                     ? Theme.of(context).colorScheme.secondary
                                     : HexColor('#1a1a1a'),
                                 borderRadius: BorderRadius.only(
-                                  bottomLeft: const Radius.circular(18),
-                                  bottomRight: const Radius.circular(18),
+                                  bottomLeft: const Radius.circular(24),
+                                  bottomRight: const Radius.circular(24),
                                   topLeft: mins.sender.id == _currentUserId
-                                      ? const Radius.circular(18)
+                                      ? const Radius.circular(24)
                                       : const Radius.circular(6),
                                   topRight: mins.sender.id == _currentUserId
                                       ? const Radius.circular(6)
-                                      : const Radius.circular(18),
+                                      : const Radius.circular(24),
                                 ),
                               ),
                               child: Column(
@@ -117,11 +117,13 @@ class _MinuteState extends State<Minute> {
                                 ],
                               ),
                             ),
-                            sText(
-                                DateFormat.jm().format(context
-                                    .convertUnixToDateTime(mins.createdAt)),
-                                color: blqGrey3,
-                                size: 12),
+                            mins.sender.id == _currentUserId
+                                ? const SizedBox.shrink()
+                                : sText(
+                                    DateFormat.jm().format(context
+                                        .convertUnixToDateTime(mins.createdAt)),
+                                    color: blqGrey3,
+                                    size: 12),
                           ],
                         )
                       ],

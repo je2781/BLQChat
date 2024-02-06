@@ -22,38 +22,34 @@ class ChatViewModel extends ChangeNotifier {
   ChatRepo? chatRepo;
 
   //Document upload
-  FilePickerResult? fileUploads;
+  FilePickerResult? fileUpload;
 
-  List<String> fileNames = [];
-  List<String> filePaths = [];
+  String? fileName;
+  String? filePath;
   List<Map<String, dynamic>> multipartFiles = [];
 
-  List<double> fileSizes = [];
+  double? fileSize;
 
   List<Chat> _savedChats = [];
 
   List<Chat> get chats => [..._savedChats];
 
   Future<void> pickFiles() async {
-    fileUploads = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
+    fileUpload = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
       withData: true,
     );
-    if (fileUploads != null) {
-      for (var i = 0; i < fileUploads!.files.length; i++) {
-        fileNames.add(fileUploads!.files[i].name);
-        fileSizes.add((fileUploads!.files[i].size / 1024) / 1024);
+    if (fileUpload != null) {
+      fileName = fileUpload!.files[0].name;
+      fileSize = ((fileUpload!.files[0].size / 1024) / 1024);
 
-        if (fileSizes[i] > 5.0) {
-          log('file(s) have exceeded file size limit');
-          toastMessage("File(s) have exceeded 5MB", long: true);
-          return;
-        }
-
-        filePaths.add(fileUploads!.paths[i]!);
-
-        multipartFiles.add({fileNames[i]: filePaths[i]});
+      if (fileSize! > 5.0) {
+        log('file have exceeded file size limit');
+        toastMessage("File have exceeded 5MB", long: true);
+        return;
       }
+
+      filePath = fileUpload!.paths[0];
     }
     notifyListeners();
   }
@@ -79,13 +75,10 @@ class ChatViewModel extends ChangeNotifier {
       final extractedUserData =
           json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
 
-      if (filePaths.isNotEmpty) {
+      if (filePath != null) {
         final ChatFileModel chatFileModel = ChatFileModel('FILE',
             userId: extractedUserData['userId'] as String,
-            files: filePaths.length > 1
-                ? Right(multipartFiles)
-                : Left(String.fromCharCodes(
-                    File(filePaths.first).readAsBytesSync())));
+            file: String.fromCharCodes(File(filePath!).readAsBytesSync()));
 
         // log('Attempting to send chat');
         final result = await chatRepo!.sendFileChat(chatFileModel);
@@ -106,7 +99,7 @@ class ChatViewModel extends ChangeNotifier {
 
         handleError('sending chat failed!');
       } else {
-        // log('sending chat successful');
+        // storing sent message in global app storage
 
         _savedChats.add(Chat(
             User(
@@ -114,10 +107,20 @@ class ChatViewModel extends ChangeNotifier {
                 id: result.right.chats!.left.sender.id,
                 isActive: result.right.chats!.left.sender.isActive,
                 profileUrl: result.right.chats!.left.sender.profileUrl),
-            filePaths.isNotEmpty ? 'FILE' : 'MESG',
+            filePath != null ? 'FILE' : 'MESG',
+            id: result.right.chats!.left.id,
+            message: result.right.chats!.left.message,
             channelType: result.right.chats!.left.channelType,
             createdAt: result.right.chats!.left.createdAt));
+        //confirming chat has been sent
         sentChat = true;
+        //storing message id of sent message in local storage
+        final messageData = json.encode(
+          {
+            'messageId': result.right.chats!.left.id,
+          },
+        );
+        await prefs.setString('messageData', messageData);
       }
     } catch (ex, trace) {
       log('Exception caught : $ex, with strace: $trace');
@@ -137,19 +140,23 @@ class ChatViewModel extends ChangeNotifier {
     const String apiToken = String.fromEnvironment('Api-token');
 
     try {
+      //getting instance of local storage
+      final prefs = await SharedPreferences.getInstance();
+
+      final extractedMessageData =
+          json.decode(prefs.getString('messageData')!) as Map<String, dynamic>;
+
       final ChatRepo chatRepo = ChatRepo(apiToken);
 
       // log('Attempting to get chats');
-      final conversations = await chatRepo.getChats();
+      final conversations =
+          await chatRepo.getChats(extractedMessageData['messageId']);
 
       if (conversations.isLeft) {
         // log('getting chats failed: ${conversations.left.status}');
         handleError('chats failed to download');
       } else {
-        // log('getting chats successful');
-        // toastMessage('chats downloaded', long: false);
-
-        _savedChats = conversations.right.chats!.right;
+        _savedChats.addAll(conversations.right.chats!.right);
       }
     } catch (ex, trace) {
       log('Exception caught : $ex, with strace: $trace');
@@ -182,7 +189,7 @@ class ChatViewModel extends ChangeNotifier {
             'url': user.right.user!.profileUrl
           },
         );
-        prefs.setString('userData', userData);
+        await prefs.setString('userData', userData);
 
         toastMessage('user profile created', long: false);
       }

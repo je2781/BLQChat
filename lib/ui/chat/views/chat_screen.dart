@@ -27,6 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!result) {
         showModalBottomSheet(
           context: context,
+          isDismissible: false,
           isScrollControlled: true,
           enableDrag: false,
           builder: (_) {
@@ -84,7 +85,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         )
                       : model.chats.isEmpty
                           ? Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(6),
                               child: Center(
                                 child: sText(
                                     'No recent chats.\nBegin a new conversation with your contact',
@@ -95,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               ),
                             )
                           : Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(6),
                               child: ListView.builder(
                                 physics: const BouncingScrollPhysics(),
                                 itemBuilder: (_, i) {

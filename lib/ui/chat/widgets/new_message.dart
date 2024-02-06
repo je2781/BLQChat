@@ -49,7 +49,8 @@ class _NewMessageState extends State<NewMessage> {
         children: [
           IconButton(
             onPressed: () async {
-              Provider.of<ChatViewModel>(context, listen: false).pickFiles();
+              await Provider.of<ChatViewModel>(context, listen: false)
+                  .pickFiles();
             },
             icon: const Icon(
               Icons.add,

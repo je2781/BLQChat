@@ -5,17 +5,17 @@ import 'package:equatable/equatable.dart';
 class ChatFileModel extends Equatable {
   final String messageType;
   final String? userId;
-  final Either<String, List<Map<String, dynamic>>>? files;
+  final String? file;
 
-  const ChatFileModel(this.messageType, {this.files, this.userId});
+  const ChatFileModel(this.messageType, {this.file, this.userId});
 
   factory ChatFileModel.fromMap(Map<String, dynamic> data) {
     return ChatFileModel(data['message_type'],
-        userId: data['user_id'] ?? 0, files: data['file'] ?? data['files']);
+        userId: data['user_id'] ?? 0, file: data['file']);
   }
 
   Map<String, dynamic> toMap() =>
-      {'files': files, 'user_id': userId, 'message_type': messageType};
+      {'file': file, 'user_id': userId, 'message_type': messageType};
 
   /// `dart:convert`
   ///
@@ -29,14 +29,13 @@ class ChatFileModel extends Equatable {
   /// Converts [ChatFileModel] to a JSON string.
   String toJson() => json.encode(toMap());
 
-  ChatFileModel copyEducationWith(
-      {String? userId, Either<String, List<Map<String, dynamic>>>? files}) {
+  ChatFileModel copyEducationWith({String? userId, String? file}) {
     return ChatFileModel(messageType,
-        userId: userId ?? this.userId, files: files ?? this.files);
+        userId: userId ?? this.userId, file: file ?? this.file);
   }
 
   @override
   List<Object?> get props {
-    return [files, messageType, userId];
+    return [file, messageType, userId];
   }
 }
