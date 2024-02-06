@@ -82,7 +82,7 @@ class _MyProfileState extends State<MyProfile> {
                 children: [
                   CardButton(
                       onPressed: _onSubmit,
-                      minWidth: 360,
+                      minWidth: 320,
                       textColor: blqWhite,
                       buttonText: 'Proceed',
                       buttonColor: blqSuccess),
