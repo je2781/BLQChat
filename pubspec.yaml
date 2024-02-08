@@ -46,6 +46,7 @@ dependencies:
   page_transition: ^2.0.2
   pretty_dio_logger: ^1.1.1
   provider: ^6.0.1
+  sendbird_chat_sdk: ^4.2.1
   flutter_localizations:
     sdk: flutter
   shared_preferences: ^2.2.2

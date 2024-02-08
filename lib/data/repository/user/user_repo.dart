@@ -25,12 +25,14 @@ class UserRepo implements UserRepoIntl {
   }
 
   @override
-  Future<Either<Failure, UserRes>> createUser(
+  Future<Either<Failure, UserRes>> updateUser(
       Map<String, dynamic> userData) async {
+    //removing user id key-value pair because redundant
+    final userId = userData.remove('user_id');
     try {
       ResponseModel response = await api.call(
-        method: HttpMethod.post,
-        endpoint: 'users',
+        method: HttpMethod.put,
+        endpoint: 'users/$userId',
         reqBody: userData,
       );
 

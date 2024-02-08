@@ -6,7 +6,7 @@ import 'package:either_dart/either.dart';
 import 'package:equatable/equatable.dart';
 
 class UserRes extends Equatable {
-  final User? user;
+  final UserProfile? user;
   final String? message;
   final bool? error;
   final int? statusCode;
@@ -15,7 +15,7 @@ class UserRes extends Equatable {
 
   factory UserRes.fromMap(Map<String, dynamic> data) => UserRes(
         message: data['message'] ?? '',
-        user: User.fromMap(data),
+        user: UserProfile.fromMap(data),
         error: data['error'] as bool?,
         statusCode: data['statusCode'] as int?,
       );
@@ -42,7 +42,7 @@ class UserRes extends Equatable {
   UserRes copyWith(
       {String? message,
       String? status,
-      User? user,
+      UserProfile? user,
       bool? error,
       int? statusCode}) {
     return UserRes(

@@ -6,7 +6,7 @@ extension UnixConversion on BuildContext {
   }
 }
 
-extension DateTimeConversion on BuildContext {
+extension DateTimeConversion on int {
   int convertDateTimeToUnix(DateTime date) {
     return date.toUtc().millisecondsSinceEpoch;
   }

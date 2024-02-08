@@ -6,6 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:either_dart/either.dart';
 
 abstract class UserRepoIntl {
-  Future<Either<Failure, UserRes>> createUser(Map<String, dynamic> userData);
+  Future<Either<Failure, UserRes>> updateUser(Map<String, dynamic> userData);
   Future<Either<Failure, UserRes>> getUser(String userId);
 }

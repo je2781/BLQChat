@@ -4,14 +4,14 @@ import 'package:blq_chat/data/response/user/user.dart';
 import 'package:equatable/equatable.dart';
 
 class Chat extends Equatable {
-  final User sender;
+  final UserProfile sender;
   final String type;
   final String? message;
   final int? createdAt;
   final String? channelType;
   final Map<String, dynamic>? attachment;
   final dynamic id;
-  final List<User>? mentionedUsers;
+  final List<UserProfile>? mentionedUsers;
   final int? updatedAt;
 
   const Chat(this.sender, this.type,
@@ -25,7 +25,7 @@ class Chat extends Equatable {
 
   static List<Chat> fromList(List<dynamic> data) => data
       .map((chatObj) => Chat(
-            User.fromMap(chatObj['user']),
+            UserProfile.fromMap(chatObj['user']),
             chatObj['type'],
             createdAt: chatObj['created_at'] ?? 0,
             message: chatObj['message'] ?? '',
@@ -37,7 +37,7 @@ class Chat extends Equatable {
       .toList();
 
   static Chat fromMap(Map<String, dynamic> chatObj) =>
-      Chat(User.fromMap(chatObj['user']), chatObj['type'],
+      Chat(UserProfile.fromMap(chatObj['user']), chatObj['type'],
           createdAt: chatObj['created_at'] ?? 0,
           message: chatObj['message'] ?? '',
           channelType: chatObj['channel_type'] ?? false,
@@ -60,7 +60,7 @@ class Chat extends Equatable {
   String toJson() => json.encode(toMap());
 
   Chat copyWith(
-    User? sender,
+    UserProfile? sender,
     String? message,
     int? createdAt,
     String? receiverType,

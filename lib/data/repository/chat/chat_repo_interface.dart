@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:either_dart/either.dart';
 
 abstract class ChatRepoIntl {
-  Future<Either<Failure, ChatRes>> getChats({int? messageId});
+  Future<Either<Failure, ChatRes>> getChats();
+  Future<Either<Failure, ChatRes>> getChat(int messageId);
   Future<Either<Failure, ChatRes>> sendChat(Map<String, dynamic> messageData);
-  Future<Either<Failure, ChatRes>> sendFileChat(ChatFileModel chatFormModel);
 }

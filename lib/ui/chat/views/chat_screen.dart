@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:blq_chat/app_utils/helper/helper.dart';
 import 'package:blq_chat/app_utils/styles/strings.dart';
+import 'package:blq_chat/service/sendbird_channel_handler.dart';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:blq_chat/ui/chat/widgets/messages.dart';
 import 'package:blq_chat/ui/chat/widgets/new_message.dart';
@@ -9,7 +10,9 @@ import 'package:blq_chat/ui/chat/widgets/profile.dart';
 import 'package:blq_chat/ui/chat/widgets/reorder_list.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -21,9 +24,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Provider.of<ChatViewModel>(context, listen: false)
-        .getUserRequest()
-        .then((result) {
+    final model = Provider.of<ChatViewModel>(context, listen: false);
+    //defining event listener for updates on new messages
+    SendbirdChat.addChannelHandler('new-message', MyOpenChannelHandler(model));
+
+    model.getUserRequest().then((result) async {
       if (!result) {
         showModalBottomSheet(
           context: context,
@@ -35,8 +40,14 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         );
       }
+      //entering open sendbird channel to send and receive messages
+      final openChannel =
+          await OpenChannel.getChannel(dotenv.get('CHANNEL_URL'));
+      await openChannel.enter();
+      //saving channel instance in global storage for receiving messages
+      model.saveChannel(openChannel);
     });
-    Provider.of<ChatViewModel>(context, listen: false).getChatsRequest();
+    model.getChatsRequest();
   }
 
   @override

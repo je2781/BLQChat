@@ -14,7 +14,7 @@ class BLQChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ChatViewModel(),
+      create: (_) => ChatViewModel()..init(),
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: BLQStrings.blqAppName,

@@ -13,7 +13,7 @@ class ApiService {
   static final Map<String, String> _requestHeaders = {
     'Accept': '*/*',
     "Connection": 'keep-alive',
-    "Content-Type": "äpplication/json"
+    "Content-Type": "application/json"
   };
 
   final String? token;

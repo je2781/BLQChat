@@ -17,6 +17,7 @@ import 'package:blq_chat/app_utils/helper/helper.dart';
 import 'package:blq_chat/data/repository/chat/chat_repo.dart';
 import 'package:blq_chat/data/requests/chat/chat_form.dart';
 import 'package:flutter/material.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class ChatViewModel extends ChangeNotifier {
   bool isLoading = false;
@@ -25,55 +26,91 @@ class ChatViewModel extends ChangeNotifier {
   ChatRepo? chatRepo;
   Either<Failure, ChatRes>? conversations;
 
-  //Document upload
-  FilePickerResult? fileUpload;
+  //sendbird open channel
+  OpenChannel? _channel;
 
-  String? fileName;
-  String? filePath;
+  //Document upload
+  FilePickerResult? _fileUpload;
+
+  String? _fileName;
+  String? _filePath;
   List<Map<String, dynamic>> multipartFiles = [];
 
-  double? fileSize;
+  double? _fileSize;
 
   List<Chat> _savedChats = [];
 
   List<Chat> get chats => [..._savedChats];
 
+  final String apiToken = dotenv.get('API_TOKEN');
+  final String appId = dotenv.get('APPLICATION_ID');
+  final String channelUrl = dotenv.get('CHANNEL_URL');
+
+  void init() {
+    SendbirdChat.init(appId: appId);
+  }
+
+  void saveNewMessage(int id) async {
+    try {
+      chatRepo = ChatRepo(apiToken);
+
+      final conversation = await chatRepo!.getChat(id);
+
+      if (conversation.isLeft) {
+        log('sending chat failed: ${conversation.left.message!['message']}');
+
+        handleError('sending chat failed!');
+      } else {
+        // storing sent message in global app storage
+
+        _savedChats.add(Chat(
+            UserProfile(
+                name: conversation.right.chats!.left.sender.name,
+                id: conversation.right.chats!.left.sender.id,
+                isActive: conversation.right.chats!.left.sender.isActive,
+                profileUrl: conversation.right.chats!.left.sender.profileUrl),
+            'MESG',
+            id: conversation.right.chats!.left.id,
+            message: conversation.right.chats!.left.message,
+            channelType: conversation.right.chats!.left.channelType,
+            createdAt: conversation.right.chats!.left.createdAt!
+                .convertDateTimeToUnix(DateTime.now())));
+      }
+    } catch (ex, trace) {
+      log('Exception caught : $ex, with strace: $trace');
+      toastMessage(ex.toString());
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  void saveChannel(OpenChannel channel) {
+    _channel = channel;
+    notifyListeners();
+  }
+
   Future<void> sendFile() async {
     try {
-      fileUpload = await FilePicker.platform.pickFiles(
+      _fileUpload = await FilePicker.platform.pickFiles(
         allowMultiple: false,
         withData: true,
       );
-      if (fileUpload != null) {
-        fileName = fileUpload!.files[0].name;
-        fileSize = ((fileUpload!.files[0].size / 1024) / 1024);
+      if (_fileUpload != null) {
+        _fileName = _fileUpload!.files[0].name;
+        _fileSize = ((_fileUpload!.files[0].size / 1024) / 1024);
 
-        if (fileSize! > 5.0) {
+        if (_fileSize! > 5.0) {
           log('file have exceeded file size limit');
           toastMessage("File have exceeded 5MB", long: true);
           return;
         }
+        // log('Attempting to send file')
 
-        //getting instance of local storage
-        final prefs = await SharedPreferences.getInstance();
+        final message = _channel!.sendFileMessage(
+            FileMessageCreateParams.withFile(File(_fileUpload!.paths[0]!),
+                fileName: _fileName));
 
-        if (!prefs.containsKey('userData')) {
-          handleError('You do not have a user profile');
-          return;
-        }
-
-        final extractedUserData =
-            json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
-
-        final ChatFileModel chatFileModel = ChatFileModel('FILE',
-            userId: extractedUserData['userId'] as String,
-            file: String.fromCharCodes(
-                File(fileUpload!.paths[0]!).readAsBytesSync()));
-
-        // log('Attempting to send chat');
-        final result = await chatRepo!.sendFileChat(chatFileModel);
-        if (result.isLeft) {
-          log('sending file failed: ${result.left.message!['message']}');
+        if (message.errorCode == 400201) {
           sentFile = false;
           handleError('sending file failed!');
         }
@@ -88,11 +125,6 @@ class ChatViewModel extends ChangeNotifier {
 
   Future<bool> sendChatRequest(
       Map<String, dynamic> chatFormData, BuildContext context) async {
-    isLoading = true;
-
-    log('This is the token gotten from env variables');
-    String apiToken = dotenv.get('API_TOKEN');
-
     chatRepo = ChatRepo(apiToken);
 
     try {
@@ -120,23 +152,24 @@ class ChatViewModel extends ChangeNotifier {
         // storing sent message in global app storage
 
         _savedChats.add(Chat(
-            User(
+            UserProfile(
                 name: result.right.chats!.left.sender.name,
                 id: result.right.chats!.left.sender.id,
                 isActive: result.right.chats!.left.sender.isActive,
                 profileUrl: result.right.chats!.left.sender.profileUrl),
-            filePath != null ? 'FILE' : 'MESG',
+            'MESG',
             id: result.right.chats!.left.id,
             message: result.right.chats!.left.message,
             channelType: result.right.chats!.left.channelType,
-            createdAt: context.convertDateTimeToUnix(DateTime.now())));
+            createdAt: result.right.chats!.left.createdAt!
+                .convertDateTimeToUnix(DateTime.now())));
         //confirming chat has been sent
         sentChat = true;
         //storing message id of sent message in local storage
         final messageData = json.encode(
           {
             'messageId': result.right.chats!.left.id,
-            'sender': result.right.chats!.left.sender.name
+            'user': result.right.chats!.left.sender.name
           },
         );
         await prefs.setString('messageData', messageData);
@@ -145,7 +178,6 @@ class ChatViewModel extends ChangeNotifier {
       log('Exception caught : $ex, with strace: $trace');
       toastMessage(ex.toString());
     } finally {
-      isLoading = false;
       notifyListeners();
     }
 
@@ -155,10 +187,8 @@ class ChatViewModel extends ChangeNotifier {
   Future<void> getChatsRequest() async {
     isLoading = true;
 
-    log('This is the token gotten from env variables');
-    final String apiToken = dotenv.get('API_TOKEN');
-
     try {
+      //getting instance of chat repo
       final ChatRepo chatRepo = ChatRepo(apiToken);
 
       //getting instance of local storage
@@ -190,25 +220,15 @@ class ChatViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> createUserRequest(Map<String, dynamic> userData) async {
-    log('This is the token gotten from env variables');
-    final String apiToken = dotenv.get('API_TOKEN');
-
+  Future<void> updateUserRequest(Map<String, dynamic> userData) async {
     try {
       final UserRepo userRepo = UserRepo(apiToken);
 
-      //checking for duplicate user profiles
-      final extractedUser = await userRepo.getUser(userData['user_id']);
-      if (extractedUser.isRight) {
-        if (extractedUser.right.user!.id == userData['user_id']) {
-          return handleError('user account already exists');
-        }
-      }
-      // log('Attempting to create user');
-      final user = await userRepo.createUser(userData);
+      // log('Attempting to update user');
+      final user = await userRepo.updateUser(userData);
 
       if (user.isLeft) {
-        handleError('could not create your profile: ');
+        handleError('user profile operation failed');
       } else {
         //storing userId in local storage to retrieve later for authentication
         final prefs = await SharedPreferences.getInstance();
@@ -220,8 +240,6 @@ class ChatViewModel extends ChangeNotifier {
           },
         );
         await prefs.setString('userData', userData);
-
-        toastMessage('user profile created', long: false);
       }
     } catch (ex, trace) {
       log('Exception caught : $ex, with strace: $trace');
@@ -230,9 +248,6 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<bool> getUserRequest() async {
-    log('This is the token gotten from env variables');
-    final String apiToken = dotenv.get('API_TOKEN');
-
     try {
       //getting instance of local storage
       final prefs = await SharedPreferences.getInstance();

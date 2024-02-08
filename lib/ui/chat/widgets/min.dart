@@ -41,13 +41,16 @@ class _MinuteState extends State<Minute> {
 
       setState(() {
         _currentUserId = extractedUserData['userId'];
-        _currentUser = extractedMessageData['sender'];
+        _currentUser = extractedMessageData['user'];
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+
     return Column(
         children: widget.minsList
             .map((mins) => Row(
@@ -84,7 +87,7 @@ class _MinuteState extends State<Minute> {
                             Container(
                               margin: EdgeInsets.only(
                                   top: 18, bottom: 0, left: 8, right: 8),
-                              width: 140,
+                              width: isPortrait ? 160 : 250,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 10,
                                 horizontal: 16,
@@ -108,6 +111,7 @@ class _MinuteState extends State<Minute> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       sText(
                                           mins.sender.id == _currentUserId
@@ -116,13 +120,17 @@ class _MinuteState extends State<Minute> {
                                                   ? 'Test'
                                                   : mins.sender.name,
                                           weight: FontWeight.bold,
+                                          align: TextAlign.start,
+                                          maxLines: 1,
                                           color:
                                               mins.sender.id == _currentUserId
                                                   ? blqWhite
                                                   : blqGrey3,
                                           size: 14),
-                                      Spacing.smallWidth(),
-                                      mins.sender.isActive
+                                      if (mins.sender.id != _currentUserId)
+                                        Spacing.smallWidth(),
+                                      mins.sender.isActive &&
+                                              mins.sender.id != _currentUserId
                                           ? Icon(
                                               Icons.circle,
                                               color: blqSuccess,

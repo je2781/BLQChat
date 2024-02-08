@@ -4,7 +4,9 @@ import 'package:blq_chat/app_utils/widgets/card_button.dart';
 import 'package:blq_chat/app_utils/widgets/spacing.dart';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
 
 class MyProfile extends StatefulWidget {
   const MyProfile({super.key});
@@ -20,7 +22,7 @@ class _MyProfileState extends State<MyProfile> {
   final _userIDFocusNode = FocusNode();
   final _urlFocusNode = FocusNode();
 
-  void _onSubmit() {
+  void _onSubmit(NavigatorState navigator, ChatViewModel model) async {
     //error checking
     if (_idController.text.isEmpty ||
         (_profileUrlController.text.isEmpty ||
@@ -29,12 +31,16 @@ class _MyProfileState extends State<MyProfile> {
       toastMessage('Check the details being entered', long: true);
       return;
     } else {
-      Provider.of<ChatViewModel>(context, listen: false).createUserRequest({
-        'user_id': _idController.text,
+      //creating user profile account in order to engage with open channel
+      await SendbirdChat.connect(_idController.text);
+      toastMessage('user profile created', long: false);
+      //updating account
+      model.updateUserRequest({
         'profile_url': _profileUrlController.text,
-        'nickname': _nameController.text
+        'nickname': _nameController.text,
+        'user_id': _idController.text
       });
-      Navigator.of(context).pop();
+      navigator.pop();
     }
   }
 
@@ -78,13 +84,15 @@ class _MyProfileState extends State<MyProfile> {
                   keyboardType: TextInputType.url,
                   focusNode: _urlFocusNode,
                   textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _onSubmit),
+                  onSubmitted: (_) => _onSubmit(Navigator.of(context),
+                      Provider.of<ChatViewModel>(context, listen: false))),
               Spacing.largeHeight(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CardButton(
-                      onPressed: _onSubmit,
+                      onPressed: () => _onSubmit(Navigator.of(context),
+                          Provider.of<ChatViewModel>(context, listen: false)),
                       minWidth: 320,
                       textColor: blqWhite,
                       buttonText: 'Proceed',
