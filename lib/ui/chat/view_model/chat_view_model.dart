@@ -46,7 +46,7 @@ class ChatViewModel extends ChangeNotifier {
   final String appId = dotenv.get('APPLICATION_ID');
   final String channelUrl = dotenv.get('CHANNEL_URL');
 
-  void init() {
+  void init() async {
     SendbirdChat.init(appId: appId);
   }
 
@@ -89,38 +89,24 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendFile() async {
-    try {
-      _fileUpload = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        withData: true,
-      );
-      if (_fileUpload != null) {
-        _fileName = _fileUpload!.files[0].name;
-        _fileSize = ((_fileUpload!.files[0].size / 1024) / 1024);
+  Future<void> pickFiles() async {
+    _fileUpload = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      withData: true,
+    );
+    if (_fileUpload != null) {
+      _fileName = _fileUpload!.files[0].name;
+      _fileSize = ((_fileUpload!.files[0].size / 1024) / 1024);
 
-        if (_fileSize! > 5.0) {
-          log('file have exceeded file size limit');
-          toastMessage("File have exceeded 5MB", long: true);
-          return;
-        }
-        // log('Attempting to send file')
-
-        final message = _channel!.sendFileMessage(
-            FileMessageCreateParams.withFile(File(_fileUpload!.paths[0]!),
-                fileName: _fileName));
-
-        if (message.errorCode == 400201) {
-          sentFile = false;
-          handleError('sending file failed!');
-        }
+      if (_fileSize! > 5.0) {
+        log('file have exceeded file size limit');
+        toastMessage("File have exceeded 5MB", long: true);
+        return;
       }
-    } catch (ex, trace) {
-      log('Exception caught : $ex, with strace: $trace');
-      toastMessage(ex.toString());
-    } finally {
-      notifyListeners();
+
+      _filePath = _fileUpload!.paths[0];
     }
+    notifyListeners();
   }
 
   Future<bool> sendChatRequest(
@@ -138,6 +124,20 @@ class ChatViewModel extends ChangeNotifier {
 
       final extractedUserData =
           json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+
+      if (_filePath != null) {
+        final ChatFileModel chatFileModel = ChatFileModel('FILE',
+            userId: extractedUserData['userId'] as String,
+            file: String.fromCharCodes(File(_filePath!).readAsBytesSync()));
+
+        // log('Attempting to send chat');
+        final result = await chatRepo!.sendFileChat(chatFileModel);
+        if (result.isLeft) {
+          log('sending file failed: ${result.left.message!['message']}');
+          sentFile = false;
+          handleError('sending file failed!');
+        }
+      }
 
       final result = await chatRepo!.sendChat({
         'message_type': 'MESG',

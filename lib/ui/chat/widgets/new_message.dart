@@ -46,7 +46,7 @@ class _NewMessageState extends State<NewMessage> {
           IconButton(
             onPressed: () async {
               await Provider.of<ChatViewModel>(context, listen: false)
-                  .sendFile();
+                  .pickFiles();
             },
             icon: const Icon(
               Icons.add,

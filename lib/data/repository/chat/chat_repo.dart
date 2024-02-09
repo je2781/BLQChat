@@ -89,4 +89,28 @@ class ChatRepo implements ChatRepoIntl {
       return Left(DefaultFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, ChatRes>> sendFileChat(
+      ChatFileModel chatFormModel) async {
+    try {
+      ResponseModel response = await api.call(
+        method: HttpMethod.post,
+        endpoint: 'open_channels/$channelUrl/messages',
+        reqBody: chatFormModel.toMap(),
+        useFormData: true,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // log('Value Right: ${response.data}');
+        return Right(ChatRes.fromMap(response.data));
+      } else {
+        // log('Value left: ${response.data}');
+        return Left(FailureResponse(response.response).toDomain());
+      }
+    } catch (ex, trace) {
+      log('ERROR caught: $ex, with stackTrace: $trace');
+      return Left(DefaultFailure());
+    }
+  }
 }

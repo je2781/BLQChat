@@ -40,12 +40,6 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         );
       }
-      //entering open sendbird channel to send and receive messages
-      final openChannel =
-          await OpenChannel.getChannel(dotenv.get('CHANNEL_URL'));
-      await openChannel.enter();
-      //saving channel instance in global storage for receiving messages
-      model.saveChannel(openChannel);
     });
     model.getChatsRequest();
   }
