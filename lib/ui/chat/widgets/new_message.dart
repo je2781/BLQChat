@@ -1,10 +1,15 @@
 import 'package:blq_chat/app_utils/styles/colors.dart';
+import 'package:blq_chat/cubits/chat_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import '../view_model/chat_view_model.dart';
 
 class NewMessage extends StatefulWidget {
+  final String? path;
+
+  NewMessage({this.path});
   @override
   State<NewMessage> createState() => _NewMessageState();
 }
@@ -17,8 +22,8 @@ class _NewMessageState extends State<NewMessage> {
     FocusScope.of(context).unfocus();
     _controller.clear();
 
-    Provider.of<ChatViewModel>(context, listen: false)
-        .sendChatRequest({'message': _newMsg}, context);
+    final model = BlocProvider.of<ChatCubit>(context, listen: false);
+    model.sendChatRequest({'message': _newMsg}, context, widget.path);
     setState(() {
       _newMsg = '';
     });
@@ -45,7 +50,7 @@ class _NewMessageState extends State<NewMessage> {
         children: [
           IconButton(
             onPressed: () async {
-              await Provider.of<ChatViewModel>(context, listen: false)
+              await BlocProvider.of<ChatCubit>(context, listen: false)
                   .pickFiles();
             },
             icon: const Icon(

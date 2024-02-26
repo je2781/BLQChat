@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  bloc:
+    dependency: "direct main"
+    description:
+      name: bloc
+      sha256: f53a110e3b48dcd78136c10daa5d51512443cea5e1348c9d80a320095fa2db9e
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.1.3"
   boolean_selector:
     dependency: transitive
     description:
@@ -326,6 +334,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_bloc:
+    dependency: "direct main"
+    description:
+      name: flutter_bloc
+      sha256: "87325da1ac757fcc4813e6b34ed5dd61169973871fdf181d6c2109dd6935ece1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.1.4"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -753,10 +769,10 @@ packages:
     dependency: "direct main"
     description:
       name: sendbird_chat_sdk
-      sha256: "56dc10d30d5756395f5ccefdde718f7a401517b5465a59ba7a41a67470e73b7a"
+      sha256: "529a26cf4de86e99e433973a2818b5806f4d7bfafc0ebad341c0b94f5d9ab0b2"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.1"
+    version: "4.2.2"
   shared_preferences:
     dependency: "direct main"
     description:

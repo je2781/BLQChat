@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:blq_chat/app_utils/styles/colors.dart';
+import 'package:blq_chat/cubits/chat_cubit.dart';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:blq_chat/ui/chat/views/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +15,8 @@ class BLQChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ChatViewModel()..init(),
+    return BlocProvider(
+      create: (_) => ChatCubit(context),
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: BLQStrings.blqAppName,

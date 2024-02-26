@@ -2,8 +2,10 @@ import 'package:blq_chat/app_utils/helper/helper.dart';
 import 'package:blq_chat/app_utils/styles/colors.dart';
 import 'package:blq_chat/app_utils/widgets/card_button.dart';
 import 'package:blq_chat/app_utils/widgets/spacing.dart';
+import 'package:blq_chat/cubits/chat_cubit.dart';
 import 'package:blq_chat/ui/chat/view_model/chat_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:sendbird_chat_sdk/sendbird_chat_sdk.dart';
@@ -22,7 +24,7 @@ class _MyProfileState extends State<MyProfile> {
   final _userIDFocusNode = FocusNode();
   final _urlFocusNode = FocusNode();
 
-  void _onSubmit(NavigatorState navigator, ChatViewModel model) async {
+  void _onSubmit(NavigatorState navigator, ChatCubit model) async {
     //error checking
     if (_idController.text.isEmpty ||
         (_profileUrlController.text.isEmpty ||
@@ -46,6 +48,8 @@ class _MyProfileState extends State<MyProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final chatBloc = BlocProvider.of<ChatCubit>(context, listen: false);
+
     return SingleChildScrollView(
       child: Card(
         elevation: 4,
@@ -84,15 +88,15 @@ class _MyProfileState extends State<MyProfile> {
                   keyboardType: TextInputType.url,
                   focusNode: _urlFocusNode,
                   textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _onSubmit(Navigator.of(context),
-                      Provider.of<ChatViewModel>(context, listen: false))),
+                  onSubmitted: (_) =>
+                      _onSubmit(Navigator.of(context), chatBloc)),
               Spacing.largeHeight(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CardButton(
-                      onPressed: () => _onSubmit(Navigator.of(context),
-                          Provider.of<ChatViewModel>(context, listen: false)),
+                      onPressed: () =>
+                          _onSubmit(Navigator.of(context), chatBloc),
                       minWidth: 320,
                       textColor: blqWhite,
                       buttonText: 'Proceed',

@@ -47,6 +47,8 @@ dependencies:
   pretty_dio_logger: ^1.1.1
   provider: ^6.0.1
   sendbird_chat_sdk: ^4.2.1
+  flutter_bloc: ^8.1.4
+  bloc: ^8.1.3
   flutter_localizations:
     sdk: flutter
   shared_preferences: ^2.2.2
